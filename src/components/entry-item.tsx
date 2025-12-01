@@ -1,12 +1,12 @@
 import { useEffect, useState } from "react";
-import { Color, List, Toast, showToast } from "@vicinae/api";
+import { Color, List, Toast, showToast, Icon } from "@vicinae/api";
 import { Entry } from "../lib/entry";
 import { getGitBranch } from "../lib/git";
 import { showGitBranch } from "../lib/preferences";
 import { showFailureToast } from "../utils";
 
 export interface EntryItemProps
-  extends Pick<List.Item.Props, "icon" | "accessoryIcon" | "actions"> {
+  extends Pick<List.Item.Props, "icon" | "actions"> {
   entry: Entry;
 }
 
@@ -20,11 +20,11 @@ function useGitBranch(path: string) {
           try {
             const branch = await getGitBranch(path);
             setBranch(branch);
-          } catch (error) {
-            showFailureToast(error, {
-              title: "Failed to get Git branch",
-            });
-          }
+           } catch (error) {
+             showFailureToast(error as Error, {
+               title: "Failed to get Git branch",
+             });
+           }
         }
       }
 
@@ -42,10 +42,7 @@ export const EntryItem = ({ entry, ...props }: EntryItemProps) => {
   return (
     <List.Item
       title={entry.title}
-      subtitle={{
-        value: entry.subtitle,
-        tooltip: entry.subtitle,
-      }}
+      subtitle={entry.subtitle}
       // detail
       accessories={
         branch
@@ -64,7 +61,7 @@ export const EntryItem = ({ entry, ...props }: EntryItemProps) => {
       icon={
         entry.type === "remote"
           ? "remote.svg"
-          : entry.path && { fileIcon: entry.path }
+          : entry.path
       }
       {...props}
     />

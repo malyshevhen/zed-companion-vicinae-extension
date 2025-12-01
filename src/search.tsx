@@ -5,9 +5,10 @@ import { Entry, getEntry } from "./lib/entry";
 import { EntryItem } from "./components/entry-item";
 import { usePinnedEntries } from "./hooks/use-pinned-entries";
 import { useRecentWorkspaces } from "./hooks/use-recent-workspaces";
+import { exec } from "child_process";
 
 export function Command() {
-  const { app, dbPath, workspaceDbVersion } = useZedContext();
+  const { appPath, dbPath, workspaceDbVersion } = useZedContext();
   const { workspaces, isLoading, error, removeEntry, removeAllEntries } =
     useRecentWorkspaces(dbPath, workspaceDbVersion);
   const {
@@ -23,7 +24,7 @@ export function Command() {
     .filter((e) => e.type === "remote" || exists(e.uri))
     .sort((a, b) => a.order - b.order);
 
-  const zedIcon = { fileIcon: app.path };
+  const zedIcon = { fileIcon: appPath };
 
   const removeAndUnpinEntry = async (entry: Pick<Entry, "id" | "uri">) => {
     await removeEntry(entry.id);
@@ -57,11 +58,14 @@ export function Command() {
                   <Action.Open
                     title="Open in Zed"
                     target={entry.uri}
-                    application={app}
+                    application={appPath}
                     icon={zedIcon}
                   />
                   {entry.type === "local" && (
-                    <Action.ShowInFinder path={entry.path} />
+                    <Action
+                      title="Show in File Manager"
+                      onAction={() => exec(`xdg-open ${entry.path}`)}
+                    />
                   )}
                   <Action
                     title="Unpin Entry"
@@ -119,11 +123,14 @@ export function Command() {
                     <Action.Open
                       title="Open in Zed"
                       target={entry.uri}
-                      application={app}
+                      application={appPath}
                       icon={zedIcon}
                     />
                     {entry.type === "local" && (
-                      <Action.ShowInFinder path={entry.path} />
+                      <Action
+                        title="Show in File Manager"
+                        onAction={() => exec(`xdg-open ${entry.path}`)}
+                      />
                     )}
                     <Action
                       title="Pin Entry"

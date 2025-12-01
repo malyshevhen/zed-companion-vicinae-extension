@@ -1,4 +1,5 @@
 import { basename } from "path";
+import { useState, useEffect } from "react";
 import { Cache } from "@vicinae/api";
 import { Entry } from "../lib/entry";
 
@@ -80,6 +81,28 @@ function migrateCache() {
 }
 
 migrateCache();
+
+function useCachedState<T>(key: string, defaultValue: T): [T, (value: T | ((prev: T) => T)) => void] {
+  const cache = new Cache();
+  const [state, setState] = useState<T>(() => {
+    try {
+      const cached = cache.get(key);
+      return cached ? JSON.parse(cached) : defaultValue;
+    } catch {
+      return defaultValue;
+    }
+  });
+
+  const setCachedState = (value: T | ((prev: T) => T)) => {
+    setState((prev) => {
+      const newValue = typeof value === 'function' ? (value as (prev: T) => T)(prev) : value;
+      cache.set(key, JSON.stringify(newValue));
+      return newValue;
+    });
+  };
+
+  return [state, setCachedState];
+}
 
 export function usePinnedEntries() {
   const [entries, setEntries] = useCachedState<PinnedEntries>(

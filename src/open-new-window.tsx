@@ -1,33 +1,16 @@
-import { closeMainWindow, getPreferenceValues } from "@vicinae/api";
-import { ZedBuild } from "./lib/zed";
-import { showFailureToast } from "./utils";
+import { Clipboard, showHUD } from "@vicinae/api";
+import { exec } from "child_process";
 
-const preferences: Record<string, string> = getPreferenceValues();
-const zedBuild: ZedBuild = preferences.build as ZedBuild;
-
-const makeNewWindow = async () => {
-  await runAppleScript(`
-    tell application "${zedBuild}"
-	    activate
-    end tell
-    delay(0.5)
-    tell application "${zedBuild}"
-	    activate
-    end tell
-
-    tell application "System Events"
-	    tell process "${zedBuild}"
-		    click menu item "New Window" of menu "File" of menu bar 1
-	    end tell
-    end tell
-  `);
-};
-
-export default async function command() {
-  try {
-    await closeMainWindow();
-    await makeNewWindow();
-  } catch (error) {
-    showFailureToast(error, { title: "Failed opening new window" });
+export default async function OpenNewWindow() {
+  const fileUrl = await Clipboard.read();
+  if (fileUrl.startsWith("file://")) {
+    const filePath = fileUrl.substring(7);
+    exec(`zed -n ${filePath}`, (error, stdout, stderr) => {
+      if (error) {
+        console.error(`exec error: ${error}`);
+        return;
+      }
+      showHUD("Opened in New Zed Window");
+    });
   }
 }

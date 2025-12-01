@@ -1,19 +1,19 @@
-import fs from "fs";
-import { ComponentType, createContext, useContext } from "react";
 import {
-  Application,
-  Detail,
-  getApplications,
-  LocalStorage,
-  showToast,
-  Toast,
-} from "@vicinae/api";
-import { zedBuild } from "../lib/preferences";
-import { getZedBundleId, getZedDbPath } from "../lib/zed";
+  ComponentType,
+  createContext,
+  useContext,
+  useEffect,
+  useState,
+} from "react";
+import { Detail, LocalStorage } from "@vicinae/api";
 import { getZedWorkspaceDbVersion } from "../lib/db";
+import { homedir } from "os";
+import { join } from "path";
+import { exec } from "child_process";
+import { accessSync } from "fs";
 
 interface ZedContextType {
-  app: Application;
+  appPath: string;
   isDbSupported: boolean;
   workspaceDbVersion: number;
   dbPath: string;
@@ -24,56 +24,112 @@ const ZedContext = createContext<ZedContextType | undefined>(undefined);
 const defaultDbVersionKey = "defaultDbVersion";
 
 function useZed() {
-  const dbPath = getZedDbPath();
+  const [appPath, setAppPath] = useState<string>("");
+  const [isLoading, setIsLoading] = useState<boolean>(true);
+  const [dbInfo, setDbInfo] = useState<{
+    isDbSupported: boolean;
+    workspaceDbVersion: number;
+  } | null>(null);
+  const [dbPath, setDbPath] = useState<string>("");
 
-  const { data, isLoading } = usePromise(async () => {
-    const defaultDbVersion =
-      await LocalStorage.getItem<number>(defaultDbVersionKey);
-    const [applications, workspaceDbVersion] = await Promise.all([
-      getApplications(),
-      getZedWorkspaceDbVersion(dbPath, defaultDbVersion),
-    ]);
-    const zedBundleId = getZedBundleId(zedBuild);
-    const app = applications.find((a) => a.bundleId === zedBundleId);
+  // Try to find the Zed database
+  const findDbPath = () => {
+    const possiblePaths = [
+      join(homedir(), ".local", "share", "zed", "db", "0-stable", "db.sqlite"),
+      join(homedir(), ".local", "share", "zed", "db", "0-global", "db.sqlite"),
+      join(homedir(), ".local", "share", "zed", "db", "0-preview", "db.sqlite"),
+      join(homedir(), ".config", "zed", "db"), // legacy path
+    ];
 
-    if (workspaceDbVersion.supported) {
-      await LocalStorage.setItem(
-        defaultDbVersionKey,
-        workspaceDbVersion.version,
-      );
+    for (const path of possiblePaths) {
+      try {
+        accessSync(path);
+        return path;
+      } catch {
+        // Path doesn't exist, try next
+      }
+    }
+    return "";
+  };
+
+  useEffect(() => {
+    async function findZed() {
+      const pathsToTry = [
+        join(homedir(), ".local", "bin", "zed"),
+        "/usr/bin/zed",
+        "/usr/local/bin/zed",
+        join(homedir(), "bin", "zed"),
+      ];
+      for (const path of pathsToTry) {
+        exec(`ls ${path}`, (error) => {
+          if (!error) {
+            setAppPath(path);
+            return;
+          }
+        });
+      }
     }
 
-    return {
-      app,
-      isDbSupported: workspaceDbVersion.supported,
-      workspaceDbVersion: workspaceDbVersion.version,
-    };
-  });
+    findZed();
+  }, []);
+
+  useEffect(() => {
+    if (appPath) {
+      const foundDbPath = findDbPath();
+      setDbPath(foundDbPath);
+    }
+  }, [appPath]);
+
+  useEffect(() => {
+    async function getDbInfo() {
+      if (appPath && dbPath) {
+        const defaultDbVersion =
+          await LocalStorage.getItem<number>(defaultDbVersionKey);
+        const workspaceDbVersion = await getZedWorkspaceDbVersion(
+          dbPath,
+          defaultDbVersion,
+        );
+
+        if (workspaceDbVersion.supported) {
+          await LocalStorage.setItem(
+            defaultDbVersionKey,
+            workspaceDbVersion.version,
+          );
+        }
+        setDbInfo({
+          isDbSupported: workspaceDbVersion.supported,
+          workspaceDbVersion: workspaceDbVersion.version,
+        });
+        setIsLoading(false);
+      }
+    }
+
+    getDbInfo();
+  }, [appPath, dbPath]);
 
   return {
-    isLoading: isLoading,
-    app: data?.app,
-    isDbSupported: !!data?.isDbSupported,
-    workspaceDbVersion: data?.workspaceDbVersion || 0,
+    isLoading,
+    appPath,
+    isDbSupported: dbInfo?.isDbSupported ?? false,
+    workspaceDbVersion: dbInfo?.workspaceDbVersion ?? 0,
     dbPath,
   };
 }
 
 export const withZed = <P extends object>(Component: ComponentType<P>) => {
   return (props: P) => {
-    const { app, isDbSupported, workspaceDbVersion, dbPath, isLoading } =
+    const { appPath, isDbSupported, workspaceDbVersion, dbPath, isLoading } =
       useZed();
 
-    if (!app) {
-      return (
-        <Detail
-          isLoading={isLoading}
-          markdown={isLoading ? "" : `No Zed app detected`}
-        />
-      );
+    if (isLoading) {
+      return <Detail markdown="Loading Zed configuration..." />;
     }
 
-    if (!dbPath || !fs.existsSync(dbPath)) {
+    if (!appPath) {
+      return <Detail markdown="No Zed app detected" />;
+    }
+
+    if (!dbPath) {
       return <Detail markdown="Zed Workspaces Database file not found" />;
     }
 
@@ -84,7 +140,7 @@ export const withZed = <P extends object>(Component: ComponentType<P>) => {
     return (
       <ZedContext.Provider
         value={{
-          app,
+          appPath,
           isDbSupported,
           workspaceDbVersion,
           dbPath,

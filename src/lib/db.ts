@@ -1,27 +1,5 @@
 import { execFilePromise } from "./utils";
-
-// Zed Build types
-export type ZedBuild = "Zed" | "Zed Preview" | "Zed Dev";
-
-const ZedBundleIdBuildMapping: Record<ZedBuild, string> = {
-  Zed: "dev.zed.Zed",
-  "Zed Preview": "dev.zed.Zed-Preview",
-  "Zed Dev": "dev.zed.Zed-Dev",
-};
-
-const ZedDbNameMapping: Record<ZedBuild, string> = {
-  Zed: "0-stable",
-  "Zed Preview": "0-preview",
-  "Zed Dev": "0-dev",
-};
-
-export function getZedBundleId(build: ZedBuild): string {
-  return ZedBundleIdBuildMapping[build];
-}
-
-export function getZedDbName(build: ZedBuild): string {
-  return ZedDbNameMapping[build];
-}
+import { showToast, Toast } from "@vicinae/api";
 
 // Current migration step for Zed Stable as of 2025-09-09
 export const DEFAULT_WORKSPACE_DB_VERSION = 28;
@@ -29,12 +7,7 @@ export const DEFAULT_WORKSPACE_DB_VERSION = 28;
 export async function queryDb(dbPath: string, query: string): Promise<string> {
   try {
     // Apply `--init /dev/null` to ignore user sqlite configuration
-    const result = await execFilePromise("sqlite3", [
-      "--init",
-      "/dev/null",
-      dbPath,
-      query,
-    ]);
+    const result = await execFilePromise("sqlite3", ["--init", "/dev/null", dbPath, query]);
 
     if (result.stderr) {
       console.error(`Error querying Zed workspace DB: ${result.stderr}`);
@@ -43,6 +16,13 @@ export async function queryDb(dbPath: string, query: string): Promise<string> {
 
     return result.stdout.trim();
   } catch (error) {
+    if (error.code === "ENOENT") {
+      showToast({
+        title: "sqlite3 not found",
+        message: "Please install sqlite3 to use this extension.",
+        style: Toast.Style.Failure,
+      });
+    }
     console.error(`Error querying Zed workspace DB: ${error}`);
     throw error;
   }
@@ -53,10 +33,7 @@ export async function getZedWorkspaceDbVersion(
   defaultDbVersion: number = DEFAULT_WORKSPACE_DB_VERSION,
 ): Promise<{ version: number; supported: boolean }> {
   try {
-    const result = await queryDb(
-      dbPath,
-      "SELECT MAX(step) FROM migrations WHERE domain = 'WorkspaceDb';",
-    );
+    const result = await queryDb(dbPath, "SELECT MAX(step) FROM migrations WHERE domain = 'WorkspaceDb';");
     const version = parseInt(result.trim(), 10);
 
     if (isNaN(version)) {
