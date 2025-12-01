@@ -33,8 +33,13 @@ function useGitBranch(path: string) {
 }
 
 export const EntryItem = ({ entry, ...props }: EntryItemProps) => {
-  const branch =
+  let branch =
     entry.type === "local" && entry.path ? useGitBranch(entry.path) : undefined;
+
+  // Truncate branch name if it's too long
+  // if (branch && branch.length > 10) {
+  //   branch = branch.substring(0, 10) + "..";
+  // }
 
   return (
     <List.Item
@@ -47,7 +52,7 @@ export const EntryItem = ({ entry, ...props }: EntryItemProps) => {
               {
                 tag: branch,
                 icon: {
-                  source: "git-branch.svg",
+                  source: "git.svg",
                   tintColor: Color.SecondaryText,
                 },
                 tooltip: `Git Branch: ${branch}`,
@@ -55,7 +60,7 @@ export const EntryItem = ({ entry, ...props }: EntryItemProps) => {
             ]
           : []
       }
-      icon={entry.type === "remote" ? "remote.svg" : entry.path}
+      icon={entry.type === "remote" ? "globe.svg" : entry.path}
       {...props}
     />
   );
