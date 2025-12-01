@@ -4,8 +4,10 @@ import { Entry } from "../lib/entry";
 import { getGitBranch } from "../lib/git";
 import { showFailureToast } from "../utils";
 
-export interface EntryItemProps
-  extends Pick<List.Item.Props, "icon" | "actions"> {
+export interface EntryItemProps extends Pick<
+  List.Item.Props,
+  "icon" | "actions"
+> {
   entry: Entry;
 }
 
@@ -37,9 +39,9 @@ export const EntryItem = ({ entry, ...props }: EntryItemProps) => {
     entry.type === "local" && entry.path ? useGitBranch(entry.path) : undefined;
 
   // Truncate branch name if it's too long
-  // if (branch && branch.length > 10) {
-  //   branch = branch.substring(0, 10) + "..";
-  // }
+  if (branch && branch.length > 15) {
+    branch = branch.substring(0, 15) + "..";
+  }
 
   return (
     <List.Item
