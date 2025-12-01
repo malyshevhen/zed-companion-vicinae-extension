@@ -53,24 +53,19 @@ function useZed() {
   };
 
   useEffect(() => {
-    async function findZed() {
-      const pathsToTry = [
-        join(homedir(), ".local", "bin", "zed"),
-        "/usr/bin/zed",
-        "/usr/local/bin/zed",
-        join(homedir(), "bin", "zed"),
-      ];
-      for (const path of pathsToTry) {
-        exec(`ls ${path}`, (error) => {
-          if (!error) {
-            setAppPath(path);
-            return;
-          }
-        });
-      }
+    // Directly set the known Zed path
+    const zedPath = join(homedir(), ".local", "bin", "zed");
+    try {
+      accessSync(zedPath);
+      setAppPath(zedPath);
+    } catch {
+      // If not found, try which command
+      exec('which zed', (error, stdout) => {
+        if (!error && stdout.trim()) {
+          setAppPath(stdout.trim());
+        }
+      });
     }
-
-    findZed();
   }, []);
 
   useEffect(() => {

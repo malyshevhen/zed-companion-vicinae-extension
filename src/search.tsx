@@ -1,4 +1,4 @@
-import { Action, ActionPanel, Icon, List } from "@vicinae/api";
+import { Action, ActionPanel, Icon, List, showHUD } from "@vicinae/api";
 import { useZedContext, withZed } from "./components/with-zed";
 import { exists } from "./lib/utils";
 import { Entry, getEntry } from "./lib/entry";
@@ -24,8 +24,6 @@ export function Command() {
     .filter((e) => e.type === "remote" || exists(e.uri))
     .sort((a, b) => a.order - b.order);
 
-  const zedIcon = { fileIcon: appPath };
-
   const removeAndUnpinEntry = async (entry: Pick<Entry, "id" | "uri">) => {
     await removeEntry(entry.id);
     unpinEntry(entry);
@@ -34,6 +32,24 @@ export function Command() {
   const removeAllAndUnpinEntries = async () => {
     await removeAllEntries();
     unpinAllEntries();
+  };
+
+  const openInZed = (uri: string) => {
+    const path = uri.startsWith('file://') ? uri.substring(7) : uri;
+    const zedPath = appPath || "/home/evhen/.local/bin/zed"; // Fallback to known path
+
+    if (!zedPath) {
+      console.error("Zed executable not found");
+      return;
+    }
+
+    exec(`"${zedPath}" "${path}"`, (error) => {
+      if (error) {
+        console.error(`Failed to open in Zed: ${error}`);
+      } else {
+        showHUD("Opened in Zed");
+      }
+    });
   };
 
   return (
@@ -55,12 +71,11 @@ export function Command() {
               entry={entry}
               actions={
                 <ActionPanel>
-                  <Action.Open
-                    title="Open in Zed"
-                    target={entry.uri}
-                    application={appPath}
-                    icon={zedIcon}
-                  />
+                   <Action
+                     title="Open in Zed"
+                     onAction={() => openInZed(entry.uri)}
+                     icon={Icon.Window}
+                   />
                   {entry.type === "local" && (
                     <Action
                       title="Show in File Manager"
@@ -120,12 +135,11 @@ export function Command() {
                 entry={entry}
                 actions={
                   <ActionPanel>
-                    <Action.Open
-                      title="Open in Zed"
-                      target={entry.uri}
-                      application={appPath}
-                      icon={zedIcon}
-                    />
+                     <Action
+                       title="Open in Zed"
+                       onAction={() => openInZed(entry.uri)}
+                       icon={Icon.Window}
+                     />
                     {entry.type === "local" && (
                       <Action
                         title="Show in File Manager"
