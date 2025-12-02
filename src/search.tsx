@@ -65,10 +65,11 @@ export function Command() {
             return null;
           }
 
-          return (
+           return (
             <EntryItem
               key={entry.uri}
               entry={entry}
+              isPinned={true}
               actions={
                 <ActionPanel>
                    <Action

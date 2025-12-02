@@ -9,6 +9,7 @@ export interface EntryItemProps extends Pick<
   "icon" | "actions"
 > {
   entry: Entry;
+  isPinned?: boolean;
 }
 
 function useGitBranch(path: string) {
@@ -34,7 +35,7 @@ function useGitBranch(path: string) {
   return branch;
 }
 
-export const EntryItem = ({ entry, ...props }: EntryItemProps) => {
+export const EntryItem = ({ entry, isPinned, ...props }: EntryItemProps) => {
   let branch =
     entry.type === "local" && entry.path ? useGitBranch(entry.path) : undefined;
 
@@ -43,25 +44,29 @@ export const EntryItem = ({ entry, ...props }: EntryItemProps) => {
     branch = branch.substring(0, 15) + "..";
   }
 
+  // Build accessories array
+  const accessories = [];
+
+  // Add git branch if available
+  if (branch) {
+    accessories.push({
+      tag: branch,
+      icon: {
+        source: "git.svg",
+        tintColor: Color.SecondaryText,
+      },
+      tooltip: `Git Branch: ${branch}`,
+    });
+  }
+
+  // Modify title to include star for pinned entries
+  const displayTitle = isPinned ? `⭐ ${entry.title}` : entry.title;
+
   return (
     <List.Item
-      title={entry.title}
+      title={displayTitle}
       subtitle={entry.subtitle}
-      // detail
-      accessories={
-        branch
-          ? [
-              {
-                tag: branch,
-                icon: {
-                  source: "git.svg",
-                  tintColor: Color.SecondaryText,
-                },
-                tooltip: `Git Branch: ${branch}`,
-              },
-            ]
-          : []
-      }
+      accessories={accessories}
       icon={entry.type === "remote" ? "globe.svg" : entry.path}
       {...props}
     />
