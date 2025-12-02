@@ -20,8 +20,6 @@ interface ZedContextType {
 
 const ZedContext = createContext<ZedContextType | undefined>(undefined);
 
-// This will be removed once we update all references
-
 function useZed() {
   const [appPath, setAppPath] = useState<string>("");
   const [isLoading, setIsLoading] = useState<boolean>(true);

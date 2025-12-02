@@ -35,7 +35,7 @@ function useGitBranch(path: string) {
   return branch;
 }
 
-export const EntryItem = ({ entry, isPinned, ...props }: EntryItemProps) => {
+export const ProjectEntry = ({ entry, isPinned, ...props }: EntryItemProps) => {
   let branch =
     entry.type === "local" && entry.path ? useGitBranch(entry.path) : undefined;
 

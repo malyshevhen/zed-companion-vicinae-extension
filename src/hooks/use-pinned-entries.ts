@@ -25,10 +25,6 @@ function toArray(dict: PinnedEntries) {
   return Object.values(dict).sort((a, b) => a.order - b.order);
 }
 
-/**
- * PinnedEntry type was changed in https://github.com/raycast/extensions/pull/21528, which broke pinned entries cache
- * This code performs cache migration
- */
 const PINNED_STORE_VERSION_KEY = "PINNED_STORE_VERSION";
 const PINNED_STORE_VERSION = "1";
 const PINNED_ENTRIES_CACHE_KEY = "pinnedEntries";
@@ -82,7 +78,10 @@ function migrateCache() {
 
 migrateCache();
 
-function useCachedState<T>(key: string, defaultValue: T): [T, (value: T | ((prev: T) => T)) => void] {
+function useCachedState<T>(
+  key: string,
+  defaultValue: T,
+): [T, (value: T | ((prev: T) => T)) => void] {
   const cache = new Cache();
   const [state, setState] = useState<T>(() => {
     try {
@@ -95,7 +94,8 @@ function useCachedState<T>(key: string, defaultValue: T): [T, (value: T | ((prev
 
   const setCachedState = (value: T | ((prev: T) => T)) => {
     setState((prev) => {
-      const newValue = typeof value === 'function' ? (value as (prev: T) => T)(prev) : value;
+      const newValue =
+        typeof value === "function" ? (value as (prev: T) => T)(prev) : value;
       cache.set(key, JSON.stringify(newValue));
       return newValue;
     });

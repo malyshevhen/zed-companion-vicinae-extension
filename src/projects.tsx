@@ -2,7 +2,7 @@ import { Action, ActionPanel, Icon, List, showHUD } from "@vicinae/api";
 import { useZedContext, withZed } from "./components/with-zed";
 import { exists } from "./lib/utils";
 import { Entry, getEntry } from "./lib/entry";
-import { EntryItem } from "./components/entry-item";
+import { ProjectEntry } from "./components/project-entry";
 import { usePinnedEntries } from "./hooks/use-pinned-entries";
 import { useRecentWorkspaces } from "./hooks/use-recent-workspaces";
 import { exec } from "child_process";
@@ -35,7 +35,7 @@ export function Command() {
   };
 
   const openInZed = (uri: string) => {
-    const path = uri.startsWith('file://') ? uri.substring(7) : uri;
+    const path = uri.startsWith("file://") ? uri.substring(7) : uri;
     const zedPath = appPath || "/home/evhen/.local/bin/zed"; // Fallback to known path
 
     if (!zedPath) {
@@ -65,48 +65,51 @@ export function Command() {
             return null;
           }
 
-           return (
-            <EntryItem
+          return (
+            <ProjectEntry
               key={entry.uri}
               entry={entry}
               isPinned={true}
               actions={
                 <ActionPanel>
-                   <Action
-                     title="Open in Zed"
-                     onAction={() => openInZed(entry.uri)}
-                     icon={Icon.Window}
-                   />
+                  <Action
+                    title="Open in Zed"
+                    onAction={() => openInZed(entry.uri)}
+                    icon={Icon.Window}
+                  />
                   {entry.type === "local" && (
                     <Action
                       title="Show in File Manager"
                       onAction={() => exec(`xdg-open ${entry.path}`)}
                     />
                   )}
-                   <Action
-                     title="Unpin Entry"
-                     icon={Icon.PinDisabled}
-                     onAction={() => unpinEntry(entry)}
-                     shortcut={{ modifiers: ["ctrl", "shift"], key: "p" }}
-                   />
+                  <Action
+                    title="Unpin Entry"
+                    icon={Icon.PinDisabled}
+                    onAction={() => unpinEntry(entry)}
+                    shortcut={{ modifiers: ["ctrl", "shift"], key: "p" }}
+                  />
                   {entry.order > 0 ? (
-                     <Action
-                       title="Move up"
-                       icon={Icon.ArrowUp}
-                       onAction={() => moveUp(entry)}
-                       shortcut={{ modifiers: ["ctrl", "shift"], key: "arrowUp" }}
-                     />
+                    <Action
+                      title="Move up"
+                      icon={Icon.ArrowUp}
+                      onAction={() => moveUp(entry)}
+                      shortcut={{
+                        modifiers: ["ctrl", "shift"],
+                        key: "arrowUp",
+                      }}
+                    />
                   ) : null}
                   {entry.order < pinned.length - 1 ? (
-                     <Action
-                       title="Move Down"
-                       icon={Icon.ArrowDown}
-                       onAction={() => moveDown(entry)}
-                       shortcut={{
-                         modifiers: ["ctrl", "shift"],
-                         key: "arrowDown",
-                       }}
-                     />
+                    <Action
+                      title="Move Down"
+                      icon={Icon.ArrowDown}
+                      onAction={() => moveDown(entry)}
+                      shortcut={{
+                        modifiers: ["ctrl", "shift"],
+                        key: "arrowDown",
+                      }}
+                    />
                   ) : null}
                   <RemoveActionSection
                     onRemoveEntry={() => removeAndUnpinEntry(entry)}
@@ -131,28 +134,28 @@ export function Command() {
             }
 
             return (
-              <EntryItem
+              <ProjectEntry
                 key={entry.uri}
                 entry={entry}
                 actions={
                   <ActionPanel>
-                     <Action
-                       title="Open in Zed"
-                       onAction={() => openInZed(entry.uri)}
-                       icon={Icon.Window}
-                     />
+                    <Action
+                      title="Open in Zed"
+                      onAction={() => openInZed(entry.uri)}
+                      icon={Icon.Window}
+                    />
                     {entry.type === "local" && (
                       <Action
                         title="Show in File Manager"
                         onAction={() => exec(`xdg-open ${entry.path}`)}
                       />
                     )}
-                     <Action
-                       title="Pin Entry"
-                       icon={Icon.Pin}
-                       onAction={() => pinEntry(entry)}
-                       shortcut={{ modifiers: ["ctrl", "shift"], key: "p" }}
-                     />
+                    <Action
+                      title="Pin Entry"
+                      icon={Icon.Pin}
+                      onAction={() => pinEntry(entry)}
+                      shortcut={{ modifiers: ["ctrl", "shift"], key: "p" }}
+                    />
                     <RemoveActionSection
                       onRemoveEntry={() => removeAndUnpinEntry(entry)}
                       onRemoveAllEntries={removeAllAndUnpinEntries}
