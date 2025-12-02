@@ -82,30 +82,30 @@ export function Command() {
                       onAction={() => exec(`xdg-open ${entry.path}`)}
                     />
                   )}
-                  <Action
-                    title="Unpin Entry"
-                    icon={Icon.PinDisabled}
-                    onAction={() => unpinEntry(entry)}
-                    shortcut={{ modifiers: ["cmd", "shift"], key: "p" }}
-                  />
+                   <Action
+                     title="Unpin Entry"
+                     icon={Icon.PinDisabled}
+                     onAction={() => unpinEntry(entry)}
+                     shortcut={{ modifiers: ["ctrl", "shift"], key: "p" }}
+                   />
                   {entry.order > 0 ? (
-                    <Action
-                      title="Move up"
-                      icon={Icon.ArrowUp}
-                      onAction={() => moveUp(entry)}
-                      shortcut={{ modifiers: ["cmd", "shift"], key: "arrowUp" }}
-                    />
+                     <Action
+                       title="Move up"
+                       icon={Icon.ArrowUp}
+                       onAction={() => moveUp(entry)}
+                       shortcut={{ modifiers: ["ctrl", "shift"], key: "arrowUp" }}
+                     />
                   ) : null}
                   {entry.order < pinned.length - 1 ? (
-                    <Action
-                      title="Move Down"
-                      icon={Icon.ArrowDown}
-                      onAction={() => moveDown(entry)}
-                      shortcut={{
-                        modifiers: ["cmd", "shift"],
-                        key: "arrowDown",
-                      }}
-                    />
+                     <Action
+                       title="Move Down"
+                       icon={Icon.ArrowDown}
+                       onAction={() => moveDown(entry)}
+                       shortcut={{
+                         modifiers: ["ctrl", "shift"],
+                         key: "arrowDown",
+                       }}
+                     />
                   ) : null}
                   <RemoveActionSection
                     onRemoveEntry={() => removeAndUnpinEntry(entry)}
@@ -146,12 +146,12 @@ export function Command() {
                         onAction={() => exec(`xdg-open ${entry.path}`)}
                       />
                     )}
-                    <Action
-                      title="Pin Entry"
-                      icon={Icon.Pin}
-                      onAction={() => pinEntry(entry)}
-                      shortcut={{ modifiers: ["cmd", "shift"], key: "p" }}
-                    />
+                     <Action
+                       title="Pin Entry"
+                       icon={Icon.Pin}
+                       onAction={() => pinEntry(entry)}
+                       shortcut={{ modifiers: ["ctrl", "shift"], key: "p" }}
+                     />
                     <RemoveActionSection
                       onRemoveEntry={() => removeAndUnpinEntry(entry)}
                       onRemoveAllEntries={removeAllAndUnpinEntries}
