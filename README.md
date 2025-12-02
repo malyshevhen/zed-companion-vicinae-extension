@@ -95,7 +95,7 @@ The extension will be automatically installed to your Vicinae extensions directo
 
 ### Zed Projects (Main Interface)
 
-- **Name**: `search`
+- **Name**: `projects`
 - **Title**: Zed Projects
 - **Description**: Browse and manage Zed editor projects
 - **Mode**: View (interactive interface)
@@ -229,27 +229,27 @@ npm run format
 
 ```
 src/
-├── components/           # React components
-│   ├── error-boundary.tsx    # Error handling
-│   ├── entry-item.tsx        # Project list items
-│   └── with-zed.tsx          # Zed context provider
-├── hooks/                   # Custom React hooks
-│   ├── use-pinned-entries.ts # Pinned projects management
-│   └── use-recent-workspaces.ts # Workspace data fetching
-├── lib/                     # Core business logic
-│   ├── index.ts            # Barrel exports
-│   ├── config.ts           # Configuration constants
-│   ├── logger.ts           # Structured logging
-│   ├── utils.ts            # Utility functions
-│   ├── db.ts               # Database operations
-│   ├── workspaces.ts       # Workspace type definitions
-│   ├── entry.ts            # Entry transformations
-│   ├── git.ts              # Git operations
-│   └── repositories/       # Data access layer
+├── components/                   # React components
+│   ├── error-boundary.tsx        # Error handling
+│   ├── project-entry.tsx         # Project list items
+│   └── with-zed.tsx              # Zed context provider
+├── hooks/                        # Custom React hooks
+│   ├── use-pinned-entries.ts     # Pinned projects management
+│   └── use-recent-workspaces.ts  # Workspace data fetching
+├── lib/                          # Core business logic
+│   ├── index.ts                  # Barrel exports
+│   ├── config.ts                 # Configuration constants
+│   ├── logger.ts                 # Structured logging
+│   ├── utils.ts                  # Utility functions
+│   ├── db.ts                     # Database operations
+│   ├── workspaces.ts             # Workspace type definitions
+│   ├── entry.ts                  # Entry transformations
+│   ├── git.ts                    # Git operations
+│   └── repositories/             # Data access layer
 │       └── workspace-repository.ts
-├── open.ts                 # Clipboard open command
-├── open-new-window.ts      # New window command
-└── search.tsx              # Main search interface
+├── open.ts                       # Clipboard open command
+├── open-in-new-window.ts         # New window command
+└── projects.tsx                  # Main projects interface
 ```
 
 ### Code Style Guidelines
