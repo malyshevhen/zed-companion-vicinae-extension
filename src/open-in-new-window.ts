@@ -4,7 +4,7 @@ import { homedir } from "os";
 import { join } from "path";
 import { validateFilePath } from "./lib/utils";
 
-export default async function OpenNewWindow() {
+export default async function OpenInNewWindow() {
   const clipboardContent = await Clipboard.read();
 
   // Check if clipboard contains text
@@ -23,7 +23,8 @@ export default async function OpenNewWindow() {
   if (!validation.isValid) {
     showToast({
       title: "Invalid file path",
-      message: validation.error || "The clipboard content is not a valid file path",
+      message:
+        validation.error || "The clipboard content is not a valid file path",
       style: Toast.Style.Failure,
     });
     return;

@@ -18,7 +18,7 @@
       "mode": "no-view"
     },
     {
-      "name": "open-new-window",
+      "name": "open-in-new-window",
       "title": "Open in New Window",
       "subtitle": "Zed",
       "description": "Open Finder items in Zed in new window",
