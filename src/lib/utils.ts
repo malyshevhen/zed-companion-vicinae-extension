@@ -1,6 +1,7 @@
 import util from "util";
 import { existsSync } from "fs";
 import { execFile } from "child_process";
+import { showToast, Toast } from "@vicinae/api";
 
 export const execFilePromise = util.promisify(execFile);
 
@@ -15,3 +16,11 @@ export function exists(p: string) {
     return false;
   }
 }
+
+export const showFailureToast = (error: Error, options: Toast.Options) => {
+  showToast({
+    ...options,
+    style: Toast.Style.Failure,
+    title: error.message,
+  });
+};

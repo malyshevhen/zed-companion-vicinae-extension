@@ -2,7 +2,7 @@ import { useEffect, useState } from "react";
 import { Color, List, Toast, showToast, Icon } from "@vicinae/api";
 import { Entry } from "../lib/entry";
 import { getGitBranch } from "../lib/git";
-import { showFailureToast } from "../utils";
+import { showFailureToast } from "../lib/utils";
 
 export interface EntryItemProps extends Pick<
   List.Item.Props,

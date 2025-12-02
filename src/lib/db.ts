@@ -16,7 +16,7 @@ export async function queryDb(dbPath: string, query: string): Promise<string> {
 
     return result.stdout.trim();
   } catch (error) {
-    if (error.code === "ENOENT") {
+    if ((error as any)?.code === "ENOENT") {
       showToast({
         title: "sqlite3 not found",
         message: "Please install sqlite3 to use this extension.",
@@ -110,12 +110,12 @@ export const ZED_WORKSPACES_QUERY_28 = `SELECT
     ELSE 'remote'
   END as type,
   workspace_id as id,
-  paths,
+  COALESCE(paths, '') as paths,
   timestamp,
-  host,
+  COALESCE(host, '') as host,
   user,
   port
 FROM workspaces
 LEFT JOIN remote_connections ON remote_connection_id = remote_connections.id
-WHERE paths IS NOT NULL AND paths != ''
+WHERE COALESCE(paths, '') != ''
 ORDER BY timestamp DESC`;
